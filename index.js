@@ -17,10 +17,11 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     await client.connect();
-    console.log("database connected");
+
     const database = client.db("travel-bangladesh");
     const serviceCollection = database.collection("serviceCollection");
     const bookingCollection = database.collection("bookingCollection");
+    const agentCollection = database.collection("agentCollection");
     // get all item from database
     app.get("/services", async (req, res) => {
       const result = await serviceCollection.find({}).toArray();
@@ -30,7 +31,7 @@ const run = async () => {
     // get single item
     app.get("/services/:id", async (req, res) => {
       const serviceId = req.params.id;
-      console.log(serviceId);
+
       const result = await serviceCollection.findOne({
         _id: ObjectId(serviceId),
       });
@@ -41,7 +42,6 @@ const run = async () => {
       const service = req.body;
       const result = await serviceCollection.insertOne(service);
       res.json(result);
-      console.log(result);
     });
     // delete a single service from database
     app.delete("/services/:id", async (req, res) => {
@@ -56,19 +56,18 @@ const run = async () => {
       const bookingItem = req.body;
       const result = await bookingCollection.insertOne(bookingItem);
       res.json(result);
-      console.log(result);
     });
     // get all booking item
     app.get("/booking", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+
       const result = await bookingCollection.find({}).toArray();
       res.json(result);
     });
     // get booking item selected user
     app.get("/booking/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
+
       const result = await bookingCollection
         .find({ email: { $eq: email } })
         .toArray();
@@ -88,12 +87,18 @@ const run = async () => {
     app.put("/booking/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
-      console.log(id, data);
+
       const filter = { _id: ObjectId(id) };
       const updateDoc = {
         $set: data,
       };
       const result = await bookingCollection.updateOne(filter, updateDoc);
+      res.json(result);
+    });
+
+    // find all agent information
+    app.get("/agents", async (req, res) => {
+      const result = await agentCollection.find({}).toArray();
       res.json(result);
     });
   } finally {
